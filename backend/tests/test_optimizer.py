@@ -53,6 +53,54 @@ def test_rewrites(expr, rule):
     ]
 
 
+@pytest.mark.parametrize(
+    "expr,expected,rule",
+    [
+        ("a NAND 0", 1, "NAND annihilator"),
+        ("0 NAND a", 1, "NAND annihilator"),
+        ("a NOR 1", 0, "NOR annihilator"),
+        ("1 NOR a", 0, "NOR annihilator"),
+        ("a XNOR a", 1, "self XNOR"),
+    ],
+)
+def test_constant_identities_remove_gates(expr, expected, rule):
+    source = f"INPUT a;OUTPUT o;o={expr};"
+    optimized = compile_source(source)
+    unoptimized = compile_source(source, optimization=False)
+    assert optimized["success"] and unoptimized["success"]
+    output = optimized["phases"]["optimization"]["output"]
+    assert [(i["dest"], i["op"], i["args"]) for i in output["instructions"]] == [
+        ("o", "COPY", [str(expected)])
+    ]
+    assert rule in [c["rule"] for c in output["changes"]]
+    expected_rows = [[0, expected], [1, expected]]
+    for result in (optimized, unoptimized):
+        assert result["phases"]["simulation"]["output"]["rows"] == expected_rows
+
+
+def test_constant_identities_resolve_aliases_and_preserve_output_ports():
+    source = (
+        "INPUT a;WIRE same;OUTPUT first,second,third,copy;"
+        "same=a;first=same NAND 0;second=1 NOR same;"
+        "third=a XNOR same;copy=third;"
+    )
+    optimized = compile_source(source)
+    unoptimized = compile_source(source, optimization=False)
+    assert optimized["success"] and unoptimized["success"]
+    output = optimized["phases"]["optimization"]["output"]
+    assert output["outputs"] == ["first", "second", "third", "copy"]
+    assert [(i["dest"], i["op"], i["args"]) for i in output["instructions"]] == [
+        ("first", "COPY", ["1"]),
+        ("second", "COPY", ["0"]),
+        ("third", "COPY", ["1"]),
+        ("copy", "COPY", ["1"]),
+    ]
+    for result in (optimized, unoptimized):
+        simulation = result["phases"]["simulation"]["output"]
+        assert simulation["columns"] == ["a", "first", "second", "third", "copy"]
+        assert simulation["rows"] == [[0, 1, 0, 1, 1], [1, 1, 0, 1, 1]]
+
+
 def test_dead_code():
     result = compile_source("INPUT a,b;WIRE w;OUTPUT o;w=a AND b;o=a;")
     optimized = result["phases"]["optimization"]["output"]

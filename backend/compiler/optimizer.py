@@ -43,6 +43,12 @@ def optimize(ir):
             and definitions[args[0]]["op"] == "NOT"
         ):
             replacement, rule = definitions[args[0]]["args"][0], "double negation"
+        elif op == "NAND" and "0" in args:
+            replacement, rule = "1", "NAND annihilator"
+        elif op == "NOR" and "1" in args:
+            replacement, rule = "0", "NOR annihilator"
+        elif op == "XNOR" and args[0] == args[1]:
+            replacement, rule = "1", "self XNOR"
         elif op in ("AND", "OR", "XOR"):
             a, b = args
             if a == b:
