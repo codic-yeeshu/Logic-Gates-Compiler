@@ -14,6 +14,10 @@ Assigned owner: **prince0906**. Initial implementation is AI-assisted; member re
 
 Build a single symbol table, check declarations and assignments, collect expression references, and verify every non-input is assigned. DFS uses active and done sets: revisiting an active signal detects a cycle; finishing a signal appends it after its dependencies.
 
+## Diagnostics
+
+Errors are positioned on the offending declaration, assignment target, or reference. When several names are undefined in one expression, the leftmost is reported, and dependencies are listed in source order. A cycle message shows the path (`Combinational cycle: w -> out -> w.`). Limit errors (`INPUT_LIMIT`, `SIGNAL_LIMIT`) point at the first declaration over the limit; `NO_OUTPUT` has no single location. Only the first error is reported.
+
 ## Worked example
 
 ```text

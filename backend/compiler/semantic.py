@@ -4,13 +4,14 @@ from .models import CompileError
 
 
 def references(node):
+    """Signal references in source order (left to right)."""
     result = []
     stack = [node]
     while stack:
         item = stack.pop()
         if item["kind"] == "reference":
             result.append(item)
-        stack.extend(item["children"])
+        stack.extend(reversed(item["children"]))
     return result
 
 
@@ -26,11 +27,13 @@ def analyze(ast):
             fail("DUPLICATE_DECLARATION", f"{name} is declared twice.", symbol["span"])
         symbols[name] = symbol
     if len(symbols) > 200:
-        fail("SIGNAL_LIMIT", "At most 200 signals are allowed.")
+        extra = list(symbols.values())[200]
+        fail("SIGNAL_LIMIT", "At most 200 signals are allowed.", extra["span"])
     inputs = [name for name, s in symbols.items() if s["kind"] == "INPUT"]
     outputs = [name for name, s in symbols.items() if s["kind"] == "OUTPUT"]
     if len(inputs) > 12:
-        fail("INPUT_LIMIT", "At most 12 inputs are allowed.")
+        extra = symbols[inputs[12]]
+        fail("INPUT_LIMIT", "At most 12 inputs are allowed.", extra["span"])
     if not outputs:
         fail("NO_OUTPUT", "Declare at least one OUTPUT.")
     for assignment in ast["assignments"]:
@@ -54,18 +57,23 @@ def analyze(ast):
     for name, symbol in symbols.items():
         if symbol["kind"] != "INPUT" and name not in assignments:
             fail("MISSING_ASSIGNMENT", f"{name} has no assignment.", symbol["span"])
-    order, active, done = [], set(), set(inputs)
+    order, active, done, path = [], set(), set(inputs), []
 
     def visit(name):
         if name in done:
             return
         if name in active:
+            loop = path[path.index(name) :] + [name]
             fail(
-                "CYCLE", f"Combinational cycle involving {name}.", symbols[name]["span"]
+                "CYCLE",
+                "Combinational cycle: " + " -> ".join(loop) + ".",
+                symbols[name]["span"],
             )
         active.add(name)
+        path.append(name)
         for dependency in dependencies[name]:
             visit(dependency)
+        path.pop()
         active.remove(name)
         done.add(name)
         order.append(name)
