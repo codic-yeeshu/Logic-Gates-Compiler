@@ -1,6 +1,8 @@
 # Team ownership and contribution record
 
-Team name: **[TO BE PROVIDED]**. Report author full names and institute details: **[TO BE PROVIDED]**.
+Team name: **ABC**. Course: **CS & AI**. Institution: **Rishihood University**.
+
+Members: Dibyajyoti (Dibya-z), Rhythm Jain (rhythm8877), Prince Sahoo (prince0906), Ritik Raj (ritikraj2425), and A M YEESHU (codic-yeeshu).
 
 The team representative authorized use of these Git author identities. Author metadata records the assigned module owner; it is not evidence of independent implementation, account authentication, or completed review.
 

@@ -34,7 +34,7 @@ Executed by the AI coding assistant on November 16, 2026. These checks are not r
 - SVG, JSON, and CSV export controls are implemented; their individual downloaded files were not inspected in this browser pass.
 - Keyboard shortcut, resize interaction, pagination beyond 32 rows, and network failure display are implemented but not individually exercised in this browser pass.
 - The report uses IEEEtran. Local command-line LaTeX is unavailable; built-in compilation was attempted and its outcome is recorded separately below.
-- Team name, full report author names, institution, member review, remote repository, and submission remain pending.
+- Team name, full report author names, institution, member review, and submission remain pending. The GitHub repository has since been created and pushed.
 
 ## Report compilation outcome
 
@@ -49,3 +49,7 @@ A fresh local clone was created outside the workspace. Its own virtual environme
 The Code generation navigation label is now Circuit, and a successful compilation opens it automatically. The netlist renderer uses AND/OR/XOR/NOT outlines, inversion bubbles for NAND/NOR/XNOR, orthogonal wires, and named input/output signals. COPY is drawn as wiring rather than a Boolean gate. Fit and actual-size views are available. Added an All gates example.
 
 Browser verification confirmed all seven gate outputs at input vectors 00, 11, and 10, automatic opening of the generated circuit, and fit/actual-size switching. Restored the Introduction example afterward. Production TypeScript/build checks pass. No browser recording was created for this update.
+
+## Final IEEE report
+
+The earlier PDF compilation limitation is resolved. Tectonic 0.17.0 compiled the revised five-page IEEEtran report successfully. All five rendered pages were inspected; after adding Team ABC, the supplied member names, CS & AI, and Rishihood University, the affected title and contribution pages were checked again. There are no overfull-box warnings. One underfull paragraph spacing warning remains. The report includes methodology, phase contracts, worked source/IR/Verilog examples, a vector circuit diagram, truth table, error cases, results, honest assigned contributions, AI disclosure, and future scope. The PDF and editable source are included in docs/report/.

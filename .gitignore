@@ -12,3 +12,4 @@ docs/report/*.log
 docs/report/*.out
 docs/report/*.fls
 docs/report/*.fdb_latexmk
+docs/report/main.pdf

@@ -1,30 +1,101 @@
 \documentclass[conference]{IEEEtran}
 \usepackage[T1]{fontenc}
 \usepackage{listings}
+\usepackage{graphicx}
 \usepackage{url}
 \usepackage{array}
-\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,frame=single}
-\title{Logic Lab: An Interactive Compiler for Combinational Logic Gates}
-\author{\IEEEauthorblockN{Team: [TO BE PROVIDED]}
-\IEEEauthorblockA{Dibya-z, rhythm8877, prince0906, ritikraj2425, codic-yeeshu\\
-Full names, institution, department: [TO BE PROVIDED]}}
+\usepackage{booktabs}
+\setlength{\tabcolsep}{4pt}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,columns=fullflexible,frame=single,keepspaces=true,showstringspaces=false}
+\newcommand{\code}[1]{\texttt{#1}}
+\title{Logic Lab: A Logic Gates Compiler with Interactive Phase Visualization}
+\author{\IEEEauthorblockN{Dibyajyoti, Rhythm Jain, Prince Sahoo, Ritik Raj, A M YEESHU}
+\IEEEauthorblockA{Team ABC --- Compiler Design Project\\
+CS \& AI, Rishihood University}}
 \begin{document}
 \maketitle
 \begin{abstract}
-Logic Lab is an educational compiler that translates a declared Boolean language into structural Verilog and an executable gate netlist. A React interface exposes lexical tokens, an abstract syntax tree, a symbol table, intermediate instructions, optimization rewrites, target code, and truth tables. The Python implementation separates compiler algorithms from a FastAPI transport adapter. Semantic analysis enforces declaration validity, single assignment, and acyclic combinational dependencies. Local optimizations include constant folding, selected Boolean identities, copy propagation, common-subexpression elimination, and dead-code elimination. Verification compares an independent abstract-syntax evaluator with original intermediate code, optimized code, and netlist evaluation across bounded generated programs. The initial automated suite passed 62 tests; two external Verilog simulator checks were skipped because Icarus Verilog was unavailable. AI-assisted implementation and assigned module ownership are explicitly distinguished from unconfirmed individual student review.
+Logic Lab is a compiler design project that turns Boolean source code into a logic circuit, Verilog code, and a truth table. It shows the output of each compiler phase so that students can understand how the source becomes a working circuit. The backend is written in Python, and the frontend uses React and TypeScript. The compiler checks tokens, grammar, declarations, assignments, and circuit dependencies. It then creates intermediate code, applies simple optimizations, and generates the target code. The interface shows tokens, an abstract syntax tree, a symbol table, intermediate instructions, optimization steps, and the generated circuit. Users can change input bits and see the output change. The automated tests passed 62 cases; two checks that require an external Verilog simulator were skipped. This report explains the design, a complete worked example, error handling, test results, assigned team responsibilities, AI assistance, and future improvements.
 \end{abstract}
 \begin{IEEEkeywords}
-compiler education, Boolean logic, intermediate representation, Verilog, visualization
+compiler design, logic gates, Boolean expressions, Verilog, interactive visualization
 \end{IEEEkeywords}
 
 \section{Introduction}
-Compiler education requires understanding both the purpose of each translation stage and the records passed between stages. A Boolean circuit language offers a compact but meaningful use case: its syntax supports expressions, its semantics require well-defined dependencies, and its target can be represented as hardware-description code. Logic Lab makes these transformations inspectable while retaining an end-to-end executable result. The phase separation follows the standard compiler organization described by Aho et al.~\cite{aho}.
+A compiler translates a program from one language into another form. It normally works through several phases, including lexical analysis, syntax analysis, semantic analysis, intermediate code generation, optimization, and code generation~\cite{aho}. Students often study these phases separately. This project brings them together in one application and makes their inputs and outputs visible.
 
-The project implements lexical, syntax, semantic, intermediate-representation (IR), optimization, and code-generation stages. Simulation is an additional validation and presentation stage, not a replacement for code generation. Multiple outputs and intermediate wires support practical examples such as half adders, full adders, and multiplexers. The implementation is local-first and does not require an AI service at runtime.
+Logic gates are a useful compiler use case because their operations are small enough to understand, but they still need real language rules. A source expression must have valid tokens and grammar. Every signal must be declared, and the circuit must not contain an invalid dependency cycle. The final circuit must also produce the correct output for each input combination.
 
-\section{Language and Requirements}
-\subsection{Source Language}
-The language declares single-bit INPUT, WIRE, and OUTPUT signals. Declarations precede assignments, and semicolons terminate statements. Identifiers are case-sensitive; reserved keywords are uppercase. Constants are limited to 0 and 1, and line comments begin with two slashes.
+Logic Lab is more than a Boolean calculator. It translates source code into a different target language, Verilog, and a gate netlist. A netlist is a list of gates and their connections. The truth table and live circuit view help users check this translation.
+
+\section{Problem Statement and Objectives}
+The project solves the following problem: accept a small logic-gate program, check that it is valid, translate it into a circuit, and explain every step of that translation.
+
+The main objectives are:
+\begin{enumerate}
+\item Implement all six core compiler phases in Python.
+\item Show tokens, the abstract syntax tree (AST), the symbol table, intermediate representation (IR), optimization changes, and target code.
+\item Generate a correct circuit and truth table for valid programs.
+\item Report lexical, syntax, and semantic errors with source locations.
+\item Keep modules separate so that each team member can explain a clear input/output contract.
+\item Provide setup instructions, tests, a report, and viva preparation material in one repository.
+\end{enumerate}
+
+The selected scope is \emph{combinational logic}. Outputs depend on the current inputs only. Clocks, stored state, flip-flops, and timing delays are outside the current scope. Supported examples include a half adder, a full adder, a multiplexer, and circuits with shared intermediate expressions.
+
+\section{Methodology and System Design}
+\subsection{Technology Stack}
+Python implements the compiler. FastAPI exposes it through an HTTP API. React and TypeScript implement the interface, while CodeMirror provides the source editor~\cite{codemirror}. Vite builds the frontend into static files. Pytest checks the Python implementation. Git and GitHub store the source and change history.
+
+The frontend and backend are in the same repository, but they run separately. The frontend can be hosted as a static website; compilation still requires the Python API. No AI model is called while a user compiles a program.
+
+\subsection{Architecture}
+Figure~\ref{fig:pipeline} shows the main data flow. Each phase is a separate Python module. The compiler modules do not depend on React or FastAPI, so they can also be used from the command line.
+\begin{figure}[ht]
+\centering
+\fbox{\begin{minipage}{0.89\columnwidth}
+\centering
+Source code\\$\downarrow$\\
+Lexer $\rightarrow$ Tokens\\$\downarrow$\\
+Parser $\rightarrow$ AST\\$\downarrow$\\
+Semantic analysis $\rightarrow$ Symbols and order\\$\downarrow$\\
+IR generation $\rightarrow$ Three-address code\\$\downarrow$\\
+Optimization $\rightarrow$ Improved IR\\$\downarrow$\\
+Code generation $\rightarrow$ Verilog and netlist\\$\downarrow$\\
+Simulation $\rightarrow$ Truth table and live values
+\end{minipage}}
+\caption{Compiler workflow. Simulation checks and displays the generated result; it is an additional stage after code generation.}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{API and Phase Contracts}
+The frontend sends source code and an optimization option to \code{POST /api/compile}. The response includes a schema version, a success flag, phase results, and diagnostics. A phase result contains its input, output, status, and explanation. \code{GET /api/health} checks whether the server is running.
+
+A language error does not remove earlier successful results. For example, a semantic error leaves the tokens and AST available, while IR and later stages are marked blocked. Invalid API request shapes are rejected separately from errors in the source language.
+
+\begin{table}[ht]
+\caption{Module Inputs and Outputs}
+\label{tab:contracts}
+\centering\small
+\begin{tabular}{@{}P{0.22\columnwidth}P{0.28\columnwidth}P{0.43\columnwidth}@{}}
+\toprule
+Module & Input & Output\\\midrule
+Lexer & Source string & Tokens and locations\\
+Parser & Token list & AST and parse trace\\
+Semantic & AST & Symbols, dependencies, ordered assignments\\
+IR generation & Validated program & Three-address instructions\\
+Optimizer & Original IR & Optimized IR and rewrite log\\
+Code generator & Selected IR & Verilog, netlist, port map\\
+Simulator & Netlist & Truth-table columns and rows\\\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Source Language}
+\subsection{Basic Syntax}
+The language supports \code{INPUT}, \code{WIRE}, and \code{OUTPUT} declarations. Every signal holds one bit. Statements end with semicolons, and declarations must appear before assignments. Identifiers are case-sensitive, while keywords are uppercase. A comment starts with \code{//} and ends at the end of its line.
+
+The supported gates are AND, OR, NOT, NAND, NOR, XOR, and XNOR. The constants are 0 and 1. The following valid program is used throughout this report:
 \begin{lstlisting}
 INPUT a, b, c;
 WIRE intermediate;
@@ -32,64 +103,87 @@ OUTPUT out;
 intermediate = a AND b;
 out = intermediate OR NOT c;
 \end{lstlisting}
-NOT has the highest operator precedence, followed by AND/NAND, XOR/XNOR, and OR/NOR. Binary tiers associate left to right. Parentheses override grouping. NAND and NOR are not associative, so this grouping is part of the language contract.
 
-\subsection{Semantic Constraints}
-Every reference must have a declaration. Inputs cannot be assigned. Every wire and output must have exactly one assignment, and at least one output is required. Forward dependencies are valid if the complete graph is acyclic. Both self-reference and multi-signal feedback cycles are rejected. These rules restrict the language to combinational circuits. Unused inputs are preserved as public ports; unused internal computation may be removed.
+\subsection{Grammar and Precedence}
+The main grammar is shown below. Braces mean repetition, and the vertical bar means a choice.
+\begin{lstlisting}
+program = {declaration} {assignment}
+declaration = (INPUT | WIRE | OUTPUT)
+              identifier {, identifier} ;
+assignment = identifier = expression ;
+expression = xor_expr {(OR | NOR) xor_expr}
+xor_expr = and_expr {(XOR | XNOR) and_expr}
+and_expr = unary {(AND | NAND) unary}
+unary = NOT unary | (expression)
+        | identifier | 0 | 1
+\end{lstlisting}
+NOT has the highest precedence, then AND/NAND, XOR/XNOR, and OR/NOR. Parentheses can change the grouping. Binary operators at the same level are grouped from left to right. This matters for NAND and NOR because changing their grouping can change the result.
 
-\subsection{Resource Bounds}
-Source is limited to 20,480 UTF-8 bytes, with at most 12 inputs and 200 declared signals. Recursive syntax and expression-tree height are bounded at 64. Truth tables therefore contain at most 4096 rows. These are engineering limits, not properties of Boolean algebra.
+\subsection{Semantic Rules and Limits}
+Every referenced signal must be declared. Names cannot be declared twice. Inputs cannot be assigned. Every wire and output must be assigned exactly once, and a program must declare at least one output. A reference to a later assignment is allowed if the complete dependency graph has no cycle.
 
-\section{Architecture and Methodology}
-The system is a monorepo with a framework-independent Python compiler, a FastAPI HTTP adapter, and a React/TypeScript frontend. The frontend is built with Vite into static assets. Static hosting still requires a separately running Python API.
+The compiler accepts at most 20,480 UTF-8 source bytes, 12 input signals, and 200 declared signals. Expression nesting and AST height are limited to 64. Twelve inputs produce 4096 truth-table rows. These limits keep the demo manageable and prevent very large truth tables from overwhelming the interface.
 
-\begin{table}[ht]
-\caption{Compiler Stage Contracts}
-\centering
-\begin{tabular}{p{0.22\columnwidth}p{0.28\columnwidth}p{0.36\columnwidth}}
-\hline
-Stage & Input & Output\\ \hline
-Lexer & Source & Positioned tokens\\
-Parser & Tokens & AST and trace\\
-Semantic & AST & Symbols and ordered assignments\\
-IR & Validated program & Three-address instructions\\
-Optimization & IR & Rewritten IR and log\\
-Code generation & Selected IR & Netlist and Verilog\\
-Simulation & Netlist & Truth table\\ \hline
-\end{tabular}
-\end{table}
-
-The compile endpoint accepts source and an optimization flag. Its versioned JSON response contains phase status, phase input/output, explanations, and diagnostics. Language errors return structured diagnostics while retaining previously completed results; dependent phases are marked blocked. Invalid request shapes are rejected independently by API validation.
-
+\section{Compiler Implementation}
 \subsection{Lexical Analysis}
-A scanner consumes comments, whitespace, complete identifiers, bits, and punctuation at the current offset. Keyword classification occurs after identifier recognition, so a name such as ANDY remains an identifier. Tokens carry zero-based offsets and one-based line/column locations. Unrecognized characters generate lexical diagnostics. Comments affect positions but do not become tokens.
+The lexer reads the source from left to right and groups characters into tokens. It recognizes complete identifiers before checking whether they are keywords. For example, \code{AND} is a keyword, while \code{ANDY} is an identifier. Whitespace and comments are skipped, but the source position is still updated.
+
+Each token stores its type, original text, and location. For example, \code{out = a AND b;} produces IDENT, EQUAL, IDENT, AND, IDENT, and SEMI tokens. An explicit EOF token marks the end. A character such as \code{\&} is rejected because the language uses the word AND rather than that symbol.
 
 \subsection{Syntax Analysis}
-A recursive-descent parser handles declarations and assignments. Precedence climbing builds expression trees; increasing the right-hand minimum precedence enforces left associativity. NOT is unary and parentheses restart expression parsing at the lowest tier. The AST retains operators and operands while omitting punctuation. A trace records completed grammar constructs. The parser reports the first error rather than attempting recovery.
+The parser uses recursive descent and precedence climbing. Recursive descent means that small functions recognize parts of the grammar. Precedence climbing decides which operator should group first. The result is an AST: a tree that keeps the meaningful operators and operands without unnecessary punctuation.
+
+For the worked example, the output expression has OR at its root. Its left child is the reference \code{intermediate}, and its right child is NOT with child \code{c}. The parser also records a short trace of completed declarations and assignments. Missing parentheses, missing semicolons, and missing operands are syntax errors.
 
 \subsection{Semantic Analysis}
-Semantic analysis constructs a shared symbol table and checks declaration uniqueness, assignment legality, missing assignments, and reference validity. Expression references form a dependency graph. Depth-first search tracks active and completed signals: encountering an active signal detects a cycle. Postorder completion supplies dependency-first evaluation order, supporting forward references without evaluating undefined values.
+Semantic analysis checks meaning after the grammar is accepted. It builds a symbol table, checks declaration and assignment rules, and collects the signals used by each expression.
 
-\subsection{IR Generation}
-Expression lowering uses iterative postorder traversal. Each operator creates a temporary and each named assignment creates a COPY instruction. Instructions contain a destination, operation, operand list, and source span. Temporary identifiers use a percent prefix, which source identifiers cannot contain. The representation is target-independent and suitable for both simulation and Verilog lowering.
+The dependencies form a graph. A depth-first search puts each assignment after the signals it needs. This is called a topological order. During the search, revisiting a signal that is still being explored identifies a cycle. A program such as \code{w = out; out = w;} is therefore rejected, even if both names are declared.
+
+\subsection{Intermediate Code Generation}
+The IR generator visits child expressions before their parent operation. It creates a temporary for each gate and then a COPY instruction for the named assignment. An instruction stores a destination, an operation, operands, and a source location.
+
+This simple form is often called three-address code: an operation uses up to two input values and stores one result. Temporary names begin with \code{\%}, which cannot appear in a user identifier. Keeping IR separate allows optimization and code generation to work without reparsing the source.
 
 \subsection{Optimization}
-The optimizer resolves aliases, folds constant gates, simplifies selected identities, removes double negation, and shares equivalent expressions. Binary operand pairs are canonicalized for common-subexpression elimination because each supported binary gate is commutative; expression grouping is unchanged. Public output copies are restored after alias propagation. A backward liveness traversal removes instructions that cannot affect an output. Each rewrite records its rule, original instruction, and replacement.
+The optimizer applies small changes that preserve the outputs:
+\begin{itemize}
+\item Constant folding: calculate expressions such as \code{1 AND 0} during compilation.
+\item Boolean identities: replace \code{a AND 1} with \code{a}, or \code{a OR 0} with \code{a}.
+\item Double negation: replace \code{NOT NOT a} with \code{a}.
+\item Copy propagation: use the original value instead of an unnecessary intermediate copy.
+\item Common-subexpression elimination: reuse a result when the same gate operation is computed again.
+\item Dead-code elimination: remove internal computations that cannot affect any output.
+\end{itemize}
+The application records the rule and the before/after values for every rewrite. Public input and output names are preserved. These are local optimizations; the project does not claim to find the smallest possible circuit.
 
-This is a local optimizer. It does not implement global Boolean minimization or claim a minimum physical gate count. COPY removal reduces IR instruction count, but COPY corresponds to wiring in generated Verilog, so instruction reduction must not be reported as an equivalent physical-gate reduction.
+\subsection{Code Generation}
+The code generator converts the selected IR into Verilog and a structural netlist. Verilog is a language for describing digital hardware. Boolean operations become gate primitives, and COPY becomes a continuous assignment.
 
-\subsection{Code Generation and Simulation}
-Code generation maps source names to safe Verilog identifiers, placing public ports before internal wires. Boolean operations become standard gate primitives, while COPY becomes a continuous assignment. The output includes a port map and a structural JSON netlist retaining logical names and source locations.
+Source names are mapped to safe names such as \code{s0} and \code{s1}. This avoids conflicts with Verilog keywords. A port map explains the correspondence between the original names and the generated names. The netlist retains the logical names and is used to draw the circuit.
 
-Simulation enumerates input combinations in declaration order. Each gate reads established inputs or earlier instruction results. A constant-only circuit has one truth-table row. The frontend additionally evaluates this netlist for manually selected input values and highlights high-valued connections. Truth-table evaluation costs approximately O($2^n I$), where $n$ is input count and $I$ is the number of instructions; a single evaluation is linear in $I$.
+\subsection{Simulation}
+The simulator tries every combination of input bits. It evaluates gates in dependency order and collects the output values into a truth table. A circuit with no inputs and one constant output has one row. The frontend also evaluates the netlist when the user toggles an input.
 
-\section{Interactive Interface}
-The interface places a resizable CodeMirror source editor~\cite{codemirror} on the left and compiler phase navigation on the right. Narrow screens stack the panels. Each phase exposes Input, Output, Explanation, and JSON views. Specialized presentations include a token table, expandable AST, symbol dependencies, IR listings, rewrite metrics, generated Verilog, conventional logic-gate symbols, and paginated truth tables.
+For $n$ inputs and $I$ instructions, a full truth table requires about $2^n I$ gate-evaluation steps. This explains why truth-table generation becomes expensive as the number of inputs grows.
 
-Compilation is explicit, with a keyboard shortcut. Source changes mark previous results stale; request sequencing prevents older responses from replacing newer ones. Positioned diagnostics select the associated editor range. Downloads include Verilog, netlist JSON, CSV truth tables, and SVG circuit drawings. Compiler source is never passed to Python eval or exec.
+\section{Worked Example and Output}
+\subsection{Tokens, AST, and Symbols}
+For the statement \code{intermediate = a AND b;}, the lexer produces six tokens before the final EOF of the program. The parser represents this assignment as an AND node with reference children a and b. Table~\ref{tab:symbols} shows the symbol table for the complete example.
+\begin{table}[ht]
+\caption{Symbol Table for the Worked Example}
+\label{tab:symbols}
+\centering\small
+\begin{tabular}{lll}
+\toprule Signal & Kind & Depends on\\\midrule
+a & INPUT & --\\b & INPUT & --\\c & INPUT & --\\
+intermediate & WIRE & a, b\\out & OUTPUT & intermediate, c\\\bottomrule
+\end{tabular}
+\end{table}
+The semantic order is intermediate followed by out. The AST does not itself prove that these references are valid; that is the job of the symbol and dependency checks.
 
-\section{Worked Compilation}
-For the introduction example, the AST contains an AND expression assigned to intermediate and an OR expression whose right operand is NOT c. Semantic dependencies place intermediate before out. The original IR is:
+\subsection{Original and Optimized IR}
+The original IR contains five instructions:
 \begin{lstlisting}
 %0 = AND a, b
 intermediate = COPY %0
@@ -97,47 +191,157 @@ intermediate = COPY %0
 %3 = OR intermediate, %2
 out = COPY %3
 \end{lstlisting}
-Copy propagation substitutes the temporary for intermediate and removes the named internal copy, leaving four instructions. Code generation emits three gate primitives and an output assignment. For input vectors 000 through 111, the output sequence is 1,0,1,0,1,0,1,1. When c is zero, NOT c forces the output high; when c is one, the result equals a AND b.
+After copy propagation, it contains four:
+\begin{lstlisting}
+%0 = AND a, b
+%2 = NOT c
+%3 = OR %0, %2
+out = COPY %3
+\end{lstlisting}
+Temporary numbers can have gaps because the generator counts all instructions, including copies. Removing one COPY reduces the IR count, but it does not mean that a physical Boolean gate was removed: COPY becomes wiring in Verilog.
 
-Changing c to an undeclared name leaves lexical and syntax phases successful but fails semantic analysis. The response retains those earlier artifacts and blocks IR generation onward. This makes the error boundary visible and prevents stale target output from being presented as a successful compilation of invalid source.
-
-\section{Verification and Results}
-The initial verification run completed 62 Python tests and skipped two parameterized Icarus Verilog checks because the external tools were absent. Tests cover positions, keyword boundaries, precedence, associativity, malformed syntax, resource limits, duplicate declarations and assignments, forward references, cycles, and API contracts. All seven gates are covered, along with constant-only circuits, multiple outputs, adders, and a multiplexer.
-
-A deterministic generator produces 150 bounded programs with three inputs and two outputs. Each program is checked for all eight input combinations. An independent AST evaluator supplies expected output values; original IR, optimized IR, and generated netlist evaluation are compared against them. This gives 1200 input-vector checks across the generated programs, each comparing three representations. It is bounded evidence, not a proof for arbitrary programs.
-
-For the optimization demonstration, nine original instructions become two optimized instructions with eight recorded rewrite events. The introduction example goes from five to four instructions through copy propagation. No benchmark claim is made about compilation latency. The optional external test compiles generated Verilog and a testbench with Icarus Verilog~\cite{icarus}, asserting expected outputs for every input vector.
-
-The TypeScript check and production frontend build pass. Browser checks observed successful compilation, AST presentation, live circuit output changes, semantic diagnostics selecting the offending identifier, optimization rewrites, a full-adder truth table, and a Verilog download. A 390-pixel viewport showed no document-level horizontal overflow. The repository verification log records subsequent checks and remaining limits.
-
-\section{Individual Responsibilities and AI Assistance}
-\begin{table}[ht]
-\caption{Assigned Module Ownership}
+\subsection{Generated Verilog}
+The input ports a, b, c map to s0, s1, s2, and out maps to s3. The generated target is:
+\begin{lstlisting}
+module logic_circuit(s0, s1, s2, s3);
+  input s0, s1, s2;
+  output s3;
+  wire s4, s5, s6;
+  and g0 (s4, s0, s1);
+  not g1 (s5, s2);
+  or g2 (s6, s4, s5);
+  assign s3 = s6;
+endmodule
+\end{lstlisting}
+Figure~\ref{fig:circuit} shows the same three-gate circuit. The figure is a schematic of the worked example, not a browser screenshot.
+\begin{figure}[ht]
 \centering
-\begin{tabular}{p{0.31\columnwidth}p{0.59\columnwidth}}
-\hline
-GitHub identity & Assigned responsibility\\ \hline
-Dibya-z & Lexer, token inspection, language specification\\
-rhythm8877 & Parser and AST inspection\\
-prince0906 & Semantic checks, symbols, diagnostics\\
-ritikraj2425 & IR, optimization, rewrite inspection\\
-codic-yeeshu & Code generation, simulation, circuit view, integration\\ \hline
+\includegraphics[width=\columnwidth]{circuit-example.pdf}
+\caption{Circuit for $out=(a\land b)\lor\neg c$. AND combines a and b; NOT inverts c; OR produces out.}
+\label{fig:circuit}
+\end{figure}
+
+\subsection{Truth Table}
+Table~\ref{tab:truth} lists every input combination. When c is 0, NOT c is 1, so out is 1. When c is 1, out equals a AND b.
+\begin{table}[ht]
+\caption{Truth Table for the Worked Example}
+\label{tab:truth}
+\centering
+\begin{tabular}{cccc}
+\toprule a & b & c & out\\\midrule
+0&0&0&1\\0&0&1&0\\0&1&0&1\\0&1&1&0\\
+1&0&0&1\\1&0&1&0\\1&1&0&1\\1&1&1&1\\\bottomrule
 \end{tabular}
 \end{table}
-The team representative specified requirements and authorized these author identities. An AI coding assistant generated the initial implementation, tests, documentation, and report draft, and performed the recorded checks. These actions are not represented as independent student implementation or testing. Member review remains pending until documented with factual evidence. Git author metadata reflects authorized assigned ownership, not proof of independent authorship. No model is invoked during compilation.
+
+\section{Interactive Visualization}
+The source editor is on the left, and phase results are on the right. Each phase has Input, Output, Explanation, and JSON views. The Input view shows exactly what the module receives, while Output shows its result. The AST can be expanded, and tables present tokens and symbols clearly.
+
+After a successful compilation, the Circuit tab opens automatically. It draws conventional gate symbols and connected wires from the generated netlist. Green wires carry 1 and gray wires carry 0. Users can toggle input bits, inspect named outputs, switch between fit and actual size, and export an SVG. Verilog and netlist JSON can also be downloaded. The simulation view offers a paginated truth table and CSV export.
+
+If source code changes, previous results are marked outdated until the next compilation. A newer request cannot be overwritten by an older response. Clicking a diagnostic selects its source location. On narrow screens, the editor and results are stacked vertically.
+
+\section{Error Handling and Quality Checks}
+\subsection{Errors by Phase}
+Table~\ref{tab:errors} gives examples of invalid input. The current compiler reports the first language error, then stops the later phases. Users correct the source and compile again.
+\begin{table}[ht]
+\caption{Important Error Cases}
+\label{tab:errors}
+\centering\small
+\begin{tabular}{@{}P{0.19\columnwidth}P{0.39\columnwidth}P{0.35\columnwidth}@{}}
+\toprule Phase & Example problem & Expected handling\\\midrule
+Lexical & Unsupported character \code{\&} & Invalid-character diagnostic\\
+Syntax & Missing semicolon or operand & Expected-token or expression diagnostic\\
+Syntax & Unclosed parenthesis & Expected closing token\\
+Semantic & Undeclared signal & Undefined-signal diagnostic\\
+Semantic & Duplicate declaration & Reject reused name\\
+Semantic & Output assigned twice & Reject second assignment\\
+Semantic & Assignment to an input & Reject assignment\\
+Semantic & Wire/output never assigned & Missing-assignment diagnostic\\
+Semantic & Dependency cycle & Cycle diagnostic\\
+Limits & Too many inputs or deep expression & Clear limit diagnostic\\\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Testing Method}
+Unit tests check each phase and its edge cases. Integration tests run full programs through the pipeline and check the API contract. Test programs include all seven gates, constants, multiple outputs, forward references, adders, and a multiplexer.
+
+The optimizer is also tested with 150 generated programs. Each has three inputs and two outputs, and all eight input combinations are checked. A separate AST evaluator gives the expected result. The tests compare this result with the original IR, optimized IR, and generated netlist. This produces 1200 input-vector checks across the generated programs. It gives evidence for these cases; it is not a proof for every possible program.
+
+\subsection{Recorded Results}
+\begin{table}[ht]
+\caption{Verified Results and Limits}
+\label{tab:results}
+\centering\small
+\begin{tabular}{@{}P{0.57\columnwidth}P{0.36\columnwidth}@{}}
+\toprule Check & Recorded result\\\midrule
+Python automated tests & 62 passed\\
+External Verilog simulator tests & 2 skipped\\
+Generated program input vectors & 1200 checked\\
+Maximum truth-table rows & 4096 checked\\
+TypeScript and static frontend build & Passed\\
+Fresh local clone: tests and build & Passed\\
+Optimization demo: IR count & 9 reduced to 2\\
+Introduction example: IR count & 5 reduced to 4\\\bottomrule
+\end{tabular}
+\end{table}
+The two skipped tests need Icarus Verilog~\cite{icarus}, which was not installed in the test environment. Therefore, this report does not claim that the generated Verilog has passed external simulation. The internal netlist and truth-table tests did pass.
+
+Browser checks confirmed compilation, AST display, diagnostic selection, live circuit values, the optimization log, and the full-adder truth table. All gate outputs were also checked in the circuit view for input vectors 00, 11, and 10. A Verilog download succeeded. Fit/actual-size switching worked, and a 390-pixel viewport had no document-level horizontal overflow. No browser recording was required for the circuit update.
+
+\section{Individual Member Contributions}
+Table~\ref{tab:members} lists the agreed module ownership. Full member names are shown below; the account mapping is recorded in the repository contribution guide. The repository contains separate module commits using these authorized identities.
+\begin{table}[ht]
+\caption{Assigned Team Responsibilities}
+\label{tab:members}
+\centering\small
+\begin{tabular}{@{}P{0.28\columnwidth}P{0.65\columnwidth}@{}}
+\toprule Member identity & Assigned module and deliverables\\\midrule
+Dibyajyoti (Dibya-z) & Lexer, positioned tokens, token view, language specification, lexer tests\\
+Rhythm Jain & Parser, precedence rules, AST, AST view, parser tests\\
+Prince Sahoo & Semantic checks, symbol table, dependency order, diagnostics, semantic tests\\
+Ritik Raj & IR generation, optimization rules, rewrite view, equivalence tests\\
+A M YEESHU & Code generation, Verilog, simulation, circuit view, frontend/backend integration\\\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Actual Work and Review Status}
+The team representative chose the topic, stack, requirements, ownership split, and local-first workflow. An AI coding assistant produced the initial source code, tests, interface, documentation, and report draft, and ran the recorded checks. Individual student implementation, testing, and review have not yet been confirmed in the project record.
+
+The table is therefore an ownership breakdown, not a claim that each student independently wrote every assigned file. Each member must review the module, run its tests, explain its input and output, and record actual changes or review evidence before submission. Pending reviews are tracked in \code{docs/contributions.md}. Git author metadata alone is not proof of independent implementation.
+
+\section{AI Assistance and Reproducibility}
+The project uses the rubric's AI Product Engineering track. AI assisted development and documentation, but the final compiler is deterministic Python. It does not send source to a language model at runtime, and it does not execute source through Python eval or exec.
+
+The repository includes the frontend, backend, examples, dependency lockfiles, tests, phase guides, and README setup commands. The main verification commands are:
+\begin{lstlisting}
+.venv/bin/python -m pytest -q
+npm --prefix frontend run build
+\end{lstlisting}
+The project repository is listed in the references~\cite{repo}. It is publicly accessible at the time of this report. The report uses the IEEE conference document class and two-column layout~\cite{ieee}.
 
 \section{Limitations and Future Scope}
-The language has no buses, clocks, flip-flops, sequential state, or timing semantics. Only the first diagnostic is reported. The visualization uses conventional logic-gate symbols and orthogonal signal connections. The initial environment lacked Icarus Verilog, so generated Verilog has not yet been externally simulated in that environment.
+Current limits include single-bit signals, combinational logic only, one reported error at a time, and a maximum of 12 inputs for complete truth tables. Optimization uses a selected set of local rules. Large circuit drawings may need scrolling, and the generated Verilog still needs external simulator verification in a suitable environment.
 
-Future work includes parser recovery, additional optimization identities, formal equivalence checking, additional target formats, automatic wire-crossing reduction, and scalable evaluation without full truth-table enumeration. Sequential logic would require explicit state and clock semantics rather than relaxing the current cycle check.
+Possible improvements are:
+\begin{enumerate}
+\item Add more Boolean simplification rules and formal equivalence checks.
+\item Generate other targets, such as VHDL or additional netlist formats.
+\item Improve parser recovery so that one compile can report several errors.
+\item Support buses and larger circuits without listing every truth-table row.
+\item Improve circuit layout to reduce wire crossings.
+\item Add sequential logic only after defining clear clock and state rules.
+\end{enumerate}
+Optimization is already implemented; future work would extend it rather than add it for the first time.
 
 \section{Conclusion}
-Logic Lab connects an inspectable compiler pipeline to a concrete hardware-description target and an executable netlist. Explicit stage contracts support modular testing and individual viva preparation. Correctness claims are bounded by recorded tests, and ownership records distinguish AI-generated implementation from verified student contributions. This manuscript uses the IEEE conference document class and organization~\cite{ieee}; team and institutional placeholders require completion before submission.
+Logic Lab implements the full compiler pipeline for a small Boolean language. It checks source code, creates and optimizes IR, and generates Verilog and a circuit netlist. The interface makes every phase visible and lets users test the circuit through input switches and truth tables. The project supports both compiler learning and an end-to-end viva demonstration. Its test results, current limits, AI assistance, and pending member reviews are stated openly so that the report matches the implementation.
 
 \begin{thebibliography}{9}
 \bibitem{aho} A. V. Aho, M. S. Lam, R. Sethi, and J. D. Ullman, \emph{Compilers: Principles, Techniques, and Tools}, 2nd ed. Pearson, 2006.
-\bibitem{ieee} IEEE, ``Conference manuscript templates.'' [Online]. Available: \url{https://www.ieee.org/conferences/publishing/templates.html}
-\bibitem{icarus} Icarus Verilog, ``Icarus Verilog documentation.'' [Online]. Available: \url{https://steveicarus.github.io/iverilog/}
 \bibitem{codemirror} CodeMirror, ``System guide.'' [Online]. Available: \url{https://codemirror.net/docs/guide/}
+\bibitem{icarus} Icarus Verilog, ``Icarus Verilog documentation.'' [Online]. Available: \url{https://steveicarus.github.io/iverilog/}
+\bibitem{repo} Logic Lab team, ``Logic-Gates-Compiler source repository.'' [Online]. Available: \url{https://github.com/codic-yeeshu/Logic-Gates-Compiler}
+\bibitem{ieee} IEEE, ``Conference manuscript templates.'' [Online]. Available: \url{https://www.ieee.org/conferences/publishing/templates.html}
 \end{thebibliography}
 \end{document}
