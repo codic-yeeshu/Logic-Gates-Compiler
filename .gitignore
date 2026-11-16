@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+.pytest_cache/
+node_modules/
+dist/
+*.egg-info/
+.env
+.DS_Store
+*.tsbuildinfo
+docs/report/*.aux
+docs/report/*.log
+docs/report/*.out
+docs/report/*.fls
+docs/report/*.fdb_latexmk
