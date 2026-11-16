@@ -2,6 +2,15 @@
 
 from .models import CompileError
 
+# Readable names for token kinds used in diagnostics.
+DISPLAY = {
+    "EQUAL": "'='",
+    "SEMI": "';'",
+    "COMMA": "','",
+    "LPAREN": "'('",
+    "RPAREN": "')'",
+    "IDENT": "a signal name",
+}
 PRECEDENCE = {"OR": 1, "NOR": 1, "XOR": 2, "XNOR": 2, "AND": 3, "NAND": 3}
 
 
@@ -20,7 +29,9 @@ class Parser:
             raise CompileError(
                 "syntax",
                 "EXPECTED_TOKEN",
-                f"Expected {kind}, found {token['lexeme'] or 'end of source'}.",
+                f"Expected {DISPLAY.get(kind, kind)}, found "
+                + (f"'{token['lexeme']}'" if token["lexeme"] else "end of source")
+                + ".",
                 token["span"],
             )
         self.index += 1

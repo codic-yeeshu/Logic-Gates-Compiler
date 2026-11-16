@@ -34,3 +34,11 @@ def test_keyword_boundaries():
 def test_byte_limit():
     with pytest.raises(CompileError, match="20 KB"):
         tokenize(" " * 20481)
+
+
+def test_line_endings_each_count_once():
+    for text in ("a\nb", "a\r\nb", "a\rb", "// c\r\nb"):
+        last = [t for t in tokenize(text) if t["kind"] == "IDENT"][-1]
+        assert (last["span"]["line"], last["span"]["column"]) == (
+            (2, 1)
+        ), repr(text)

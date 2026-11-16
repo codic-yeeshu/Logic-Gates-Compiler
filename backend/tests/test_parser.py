@@ -48,3 +48,15 @@ def test_invalid_syntax(source):
 def test_depth_limit(text):
     with pytest.raises(CompileError, match="64"):
         expression(text)
+
+
+def test_readable_expected_token_messages():
+    from compiler.pipeline import compile_source
+
+    def message(source):
+        return compile_source(source)["diagnostics"][0]["message"]
+
+    assert message("INPUT a;OUTPUT o;o a;") == "Expected '=', found 'a'."
+    assert message("INPUT a;OUTPUT o;o = (a;") == "Expected ')', found ';'."
+    assert message("INPUT a;OUTPUT o;o = a") == "Expected ';', found end of source."
+    assert message("INPUT ;") == "Expected a signal name, found ';'."

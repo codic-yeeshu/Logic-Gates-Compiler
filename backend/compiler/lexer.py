@@ -4,7 +4,7 @@ import re
 from .models import CompileError
 
 KEYWORDS = set("INPUT WIRE OUTPUT AND OR NOT NAND NOR XOR XNOR".split())
-PATTERN = re.compile(r"//[^\n]*|\s+|[A-Za-z_][A-Za-z_0-9]*|[01]|[=;,()]")
+PATTERN = re.compile(r"//[^\r\n]*|\s+|[A-Za-z_][A-Za-z_0-9]*|[01]|[=;,()]")
 PUNCT = {"=": "EQUAL", ";": "SEMI", ",": "COMMA", "(": "LPAREN", ")": "RPAREN"}
 
 
@@ -32,9 +32,11 @@ def tokenize(source):
                 else PUNCT.get(value, "BIT" if value in ("0", "1") else "IDENT")
             )
             tokens.append(dict(kind=kind, lexeme=value, span=span))
-        if "\n" in value:
-            line += value.count("\n")
-            col = len(value.rsplit("\n", 1)[1]) + 1
+        if "\n" in value or "\r" in value:
+            # CRLF, LF, and a lone CR each end one line; offsets are unaffected.
+            text = value.replace("\r\n", "\n").replace("\r", "\n")
+            line += text.count("\n")
+            col = len(text.rsplit("\n", 1)[1]) + 1
         else:
             col += len(value)
         pos = match.end()
