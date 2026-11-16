@@ -15,6 +15,18 @@ export interface ASTNode {
   children: ASTNode[];
   span: Span;
 }
+export interface ASTAssignment {
+  name: string;
+  expression: ASTNode;
+  span: Span;
+}
+export interface ASTData {
+  ast: {
+    declarations: SymbolRecord[];
+    assignments: ASTAssignment[];
+  };
+  trace: string[];
+}
 export interface SymbolRecord {
   name: string;
   kind: string;

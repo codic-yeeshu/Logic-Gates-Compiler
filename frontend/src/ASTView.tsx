@@ -1,6 +1,6 @@
-import type { ASTNode, SymbolRecord } from "./types";
+import type { ASTAssignment, ASTData, ASTNode, SymbolRecord } from "./types";
 export function Tree({ node }: { node: ASTNode }) {
-  return node.children.length ? (
+  return node.children?.length ? (
     <details className="tree" open>
       <summary>
         <span className="tag">{node.kind}</span> <strong>{node.value}</strong>
@@ -15,18 +15,18 @@ export function Tree({ node }: { node: ASTNode }) {
     </div>
   );
 }
-export function ASTView({ data }: { data: any }) {
+export function ASTView({ data }: { data: ASTData }) {
   return (
     <>
       <div className="declarations">
-        {data.ast.declarations.map((s: SymbolRecord) => (
-          <span className="tag" key={s.name}>
+        {data.ast.declarations.map((s: SymbolRecord, i: number) => (
+          <span className="tag" key={`${s.name}-${i}`}>
             {s.kind} {s.name}
           </span>
         ))}
       </div>
-      {data.ast.assignments.map((a: any) => (
-        <section className="ast-assignment" key={a.name}>
+      {data.ast.assignments.map((a: ASTAssignment, i: number) => (
+        <section className="ast-assignment" key={`${a.name}-${i}`}>
           <h3>{a.name} =</h3>
           <Tree node={a.expression} />
         </section>

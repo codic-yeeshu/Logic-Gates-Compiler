@@ -5,8 +5,8 @@ export function TruthTable({
   data: { columns: string[]; rows: number[][]; row_count: number };
 }) {
   const [page, setPage] = useState(0);
-  const pages = Math.ceil(data.rows.length / 32);
-  const current = Math.min(page, pages - 1);
+  const pages = Math.max(1, Math.ceil(data.rows.length / 32));
+  const current = Math.max(0, Math.min(page, pages - 1));
   return (
     <>
       <div className="table-tools">
