@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Editor } from "./Editor";
 import {
   TokenView,
@@ -10,6 +10,7 @@ import {
 } from "./PhaseViews";
 import { Circuit, download } from "./Circuit";
 import { examples } from "./examples";
+import { loadDraft, saveDraft } from "./draft";
 import type { Compilation, PhaseName, Span } from "./types";
 const phases: [PhaseName, string, string][] = [
   ["lexical", "Lexical analysis", "Tokens"],
@@ -22,8 +23,11 @@ const phases: [PhaseName, string, string][] = [
 ];
 const api = (import.meta as any).env.VITE_API_URL || "http://127.0.0.1:8000";
 export default function App() {
-  const [source, setSource] = useState(examples.Introduction),
-    [optimization, setOptimization] = useState(true),
+  const [draft, setDraft] = useState(
+    () => loadDraft() ?? { source: examples.Introduction, optimization: true },
+  );
+  const { source, optimization } = draft;
+  const [draftSaved, setDraftSaved] = useState<boolean | null>(null),
     [result, setResult] = useState<Compilation | null>(null),
     [active, setActive] = useState<PhaseName>("lexical"),
     [tab, setTab] = useState("Output"),
@@ -35,6 +39,11 @@ export default function App() {
     [editorWidth, setEditorWidth] = useState(40);
   const request = useRef(0);
   const abort = useRef<AbortController | null>(null);
+  useEffect(() => {
+    setDraftSaved(saveDraft(draft));
+  }, [draft]);
+  const selectedExample =
+    Object.keys(examples).find((name) => examples[name] === source) ?? "";
   const stale =
     !!result && (compiled !== source || compiledOpt !== optimization);
   const errorSpans = useMemo(
@@ -48,7 +57,26 @@ export default function App() {
     request.current++;
     abort.current?.abort();
     setBusy(false);
-    setSource(value);
+    setDraft((current) => ({ ...current, source: value }));
+  }
+  function resetDraft() {
+    if (
+      !window.confirm(
+        "Reset your draft to Introduction? Your current circuit will be replaced.",
+      )
+    )
+      return;
+    request.current++;
+    abort.current?.abort();
+    setBusy(false);
+    setDraft({ source: examples.Introduction, optimization: true });
+    setResult(null);
+    setError("");
+    setSelection(null);
+    setCompiled("");
+    setCompiledOpt(true);
+    setActive("lexical");
+    setTab("Output");
   }
   async function compile() {
     const id = ++request.current;
@@ -238,9 +266,12 @@ export default function App() {
               Example
               <select
                 aria-label="Choose example"
-                defaultValue="Introduction"
+                value={selectedExample}
                 onChange={(e) => edit(examples[e.target.value])}
               >
+                <option value="" disabled>
+                  Custom circuit
+                </option>
                 {Object.keys(examples).map((n) => (
                   <option key={n}>{n}</option>
                 ))}
@@ -254,7 +285,8 @@ export default function App() {
                   request.current++;
                   abort.current?.abort();
                   setBusy(false);
-                  setOptimization(e.target.checked);
+                  const enabled = e.target.checked;
+                  setDraft((current) => ({ ...current, optimization: enabled }));
                 }}
               />{" "}
               Optimize
@@ -273,6 +305,21 @@ export default function App() {
               <span className="separator">/</span> Boolean DSL
             </span>
             <span>⌘ / Ctrl + Enter</span>
+          </div>
+          <div className="draft-tools">
+            <span role="status">
+              {draftSaved === null
+                ? "Saving draft…"
+                : draftSaved
+                  ? "Draft saved in this browser"
+                  : "Draft could not be saved in this browser"}
+            </span>
+            <button
+              onClick={resetDraft}
+              disabled={source === examples.Introduction && optimization}
+            >
+              Reset draft
+            </button>
           </div>
           <div className="compile-area">
             <button className="primary" onClick={compile} disabled={busy}>

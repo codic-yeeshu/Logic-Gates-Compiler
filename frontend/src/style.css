@@ -215,6 +215,22 @@ input {
   padding: 0 8px;
   color: #b5beaf;
 }
+.draft-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid #e0e5db;
+}
+.draft-tools > span {
+  flex: 1;
+  min-width: 140px;
+  color: #6e7b68;
+  font-size: 11px;
+  line-height: 1.5;
+}
 .compile-area {
   padding: 20px;
   display: flex;

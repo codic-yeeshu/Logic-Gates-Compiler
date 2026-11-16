@@ -27,6 +27,8 @@ npm --prefix frontend run dev
 
 Open http://127.0.0.1:5173. Choose an example, press **Compile circuit**, and navigate the seven phases. The example menu includes working circuits and one program per error class (lexical, syntax, and two semantic errors); the offending text is underlined in the editor. Use Ctrl+Enter / Cmd+Enter to compile. Click a diagnostic to select the source location. Drag the divider, or focus it and use arrow keys, to resize the editor.
 
+The editor automatically saves your current source and Optimize setting in this browser and restores them when you return to the same site address. Compile again to regenerate results. **Reset draft** restores Introduction and enables optimization after confirmation. Choosing an example replaces the saved draft. If browser storage is unavailable, editing and compilation still work and the save status indicates that the draft could not be saved.
+
 ## Example
 
 ```text
