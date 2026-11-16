@@ -737,3 +737,16 @@ footer {
     scroll-behavior: auto !important;
   }
 }
+.circuit-caption {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 10px;
+  color: #6c7d66;
+  margin: 0 0 14px;
+}
+.schematic {
+  min-height: 230px;
+  max-height: 520px;
+}

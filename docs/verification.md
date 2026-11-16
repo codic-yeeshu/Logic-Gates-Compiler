@@ -43,3 +43,9 @@ The built-in LaTeX compiler timed out while downloading and initializing its TeX
 ## Clean-checkout verification
 
 A fresh local clone was created outside the workspace. Its own virtual environment and frontend dependencies were installed from the committed dependency files. Running its test suite produced **62 passed, 2 skipped**, and its production frontend build passed with Node 24.22.1. The check did not use the workspace's node_modules or virtual environment. The host's default npm path changed after an interruption, so the installed Node 24 bin directory was explicitly placed first in PATH for the final build.
+
+## Circuit discoverability and schematic update
+
+The Code generation navigation label is now Circuit, and a successful compilation opens it automatically. The netlist renderer uses AND/OR/XOR/NOT outlines, inversion bubbles for NAND/NOR/XNOR, orthogonal wires, and named input/output signals. COPY is drawn as wiring rather than a Boolean gate. Fit and actual-size views are available. Added an All gates example.
+
+Browser verification confirmed all seven gate outputs at input vectors 00, 11, and 10, automatic opening of the generated circuit, and fit/actual-size switching. Restored the Introduction example afterward. Production TypeScript/build checks pass. No browser recording was created for this update.

@@ -17,7 +17,7 @@ const phases: [PhaseName, string, string][] = [
   ["semantic", "Semantic analysis", "Symbols & dependencies"],
   ["ir", "Intermediate code", "Three-address instructions"],
   ["optimization", "Optimization", "Simplification & sharing"],
-  ["codegen", "Code generation", "Verilog & gate circuit"],
+  ["codegen", "Generated circuit", "Logic-gate schematic & Verilog"],
   ["simulation", "Simulation", "Truth table"],
 ];
 const api = (import.meta as any).env.VITE_API_URL || "http://127.0.0.1:8000";
@@ -63,7 +63,10 @@ export default function App() {
       setResult(data);
       setCompiled(source);
       setCompiledOpt(optimization);
-      if (!data.success) {
+      if (data.success) {
+        setActive("codegen");
+        setTab("Output");
+      } else {
         setActive(data.diagnostics[0].phase as PhaseName);
         setTab("Output");
       }
@@ -125,7 +128,7 @@ export default function App() {
       case "codegen":
         return (
           <>
-            <h3>Interactive gate circuit</h3>
+            <h3>Circuit generated from your code</h3>
             <Circuit
               key={compiled + String(compiledOpt)}
               netlist={data.netlist}
@@ -372,7 +375,7 @@ export default function App() {
                     "Symbols",
                     "IR",
                     "Optimize",
-                    "Generate",
+                    "Circuit",
                     "Simulate",
                   ][index]
                 }
