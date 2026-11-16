@@ -39,3 +39,7 @@ Executed by the AI coding assistant on November 16, 2026. These checks are not r
 ## Report compilation outcome
 
 The built-in LaTeX compiler timed out while downloading and initializing its TeX format dependencies. It did not produce a confirmed PDF compilation result. No report PDF or visual PDF QA is claimed. The complete IEEEtran source and two-pass build instructions are provided in `report/`; compile it with a ready TeX installation or import it into Overleaf before submission.
+
+## Clean-checkout verification
+
+A fresh local clone was created outside the workspace. Its own virtual environment and frontend dependencies were installed from the committed dependency files. Running its test suite produced **62 passed, 2 skipped**, and its production frontend build passed with Node 24.22.1. The check did not use the workspace's node_modules or virtual environment. The host's default npm path changed after an interruption, so the installed Node 24 bin directory was explicitly placed first in PATH for the final build.
