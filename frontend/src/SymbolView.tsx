@@ -17,7 +17,11 @@ export function SymbolView({ data }: { data: any }) {
                 <code>{s.name}</code>
               </td>
               <td>{s.kind}</td>
-              <td>{data.dependencies[s.name]?.join(", ") || "—"}</td>
+              <td>
+                {Object.hasOwn(data.dependencies, s.name)
+                  ? data.dependencies[s.name].join(", ") || "—"
+                  : "—"}
+              </td>
             </tr>
           ))}
         </tbody>

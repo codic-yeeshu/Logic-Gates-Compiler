@@ -54,6 +54,7 @@ Source → Lexer → Parser → Semantic analysis → IR → Optimizer → Code 
 
 ```sh
 .venv/bin/python -m pytest -q
+npm --prefix frontend test
 npm --prefix frontend run build
 PYTHONPATH=backend .venv/bin/python -m compiler examples/full-adder.logic
 PYTHONPATH=backend .venv/bin/python -m compiler examples/intro.logic --phase ir

@@ -88,13 +88,20 @@ function GateSymbol({ op, high }: { op: string; high: boolean }) {
 }
 
 export function Circuit({ netlist }: { netlist: Netlist }) {
-  const [inputs, setInputs] = useState<Record<string, number>>({});
+  const [inputs, setInputs] = useState(() => new Map<string, number>());
   const [fit, setFit] = useState(true);
   const svgRef = useRef<SVGSVGElement>(null);
-  const values: Record<string, number> = { "0": 0, "1": 1 };
-  const levels: Record<string, number> = { "0": 0, "1": 0 };
+  // Signal names can be Object prototype properties, including __proto__.
+  const values: Record<string, number> = Object.assign(Object.create(null), {
+    "0": 0,
+    "1": 1,
+  });
+  const levels: Record<string, number> = Object.assign(Object.create(null), {
+    "0": 0,
+    "1": 0,
+  });
   netlist.inputs.forEach((name) => {
-    values[name] = inputs[name] || 0;
+    values[name] = inputs.get(name) ?? 0;
     levels[name] = 0;
   });
   netlist.gates.forEach((g) => {
@@ -112,7 +119,7 @@ export function Circuit({ netlist }: { netlist: Netlist }) {
     ...netlist.gates.map((g) => ({ name: g.dest, op: g.op })),
   ];
   const counts: Record<number, number> = {},
-    positions: Record<string, { x: number; y: number }> = {};
+    positions: Record<string, { x: number; y: number }> = Object.create(null);
   nodes.forEach((n) => {
     const level = levels[n.name];
     const row = counts[level] || 0;
@@ -146,7 +153,11 @@ export function Circuit({ netlist }: { netlist: Netlist }) {
             key={name}
             className={values[name] ? "on" : ""}
             aria-pressed={!!values[name]}
-            onClick={() => setInputs({ ...inputs, [name]: 1 - values[name] })}
+            onClick={() =>
+              setInputs((previous) =>
+                new Map(previous).set(name, 1 - (previous.get(name) ?? 0)),
+              )
+            }
           >
             {name} <b>{values[name]}</b>
           </button>
@@ -211,8 +222,7 @@ export function Circuit({ netlist }: { netlist: Netlist }) {
             return (
               <g key={n.name} transform={`translate(${p.x},${p.y})`}>
                 <title>
-                  {n.op}: {n.name} = {values[n.name]}
-                  {output ? " (output)" : ""}
+                  {`${n.op}: ${n.name} = ${values[n.name]}${output ? " (output)" : ""}`}
                 </title>
                 {port ? (
                   <>
