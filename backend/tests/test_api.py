@@ -63,3 +63,10 @@ def test_unicode_comment_and_deep_ast_serialization():
     response = client.post("/api/compile", json={"source": source})
     assert response.status_code == 200 and response.json()["success"]
     assert response.json()["phases"]["lexical"]["output"][0]["span"]["line"] == 2
+
+
+def test_lone_surrogate_is_rejected_not_a_server_error():
+    response = client.post(
+        "/api/compile", content='{"source":"\\ud800"}', headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 422
