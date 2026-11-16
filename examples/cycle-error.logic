@@ -1,0 +1,5 @@
+// Semantic error: out and w depend on each other
+WIRE w;
+OUTPUT out;
+w = out;
+out = w;

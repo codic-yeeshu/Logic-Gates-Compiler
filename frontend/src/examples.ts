@@ -5,5 +5,8 @@ export const examples: Record<string, string> = {
   "Half adder": `INPUT a, b;\nOUTPUT sum, carry;\nsum = a XOR b;\ncarry = a AND b;`,
   Multiplexer: `INPUT a, b, select;\nOUTPUT out;\nout = (a AND NOT select) OR (b AND select);`,
   Optimization: `INPUT a, b;\nWIRE first, second, unused;\nOUTPUT out;\nfirst = a AND b;\nsecond = b AND a;\nunused = a OR b;\nout = (first OR second) AND 1;`,
+  "Error: lexical": `// Lexical error: & is not a valid token\nINPUT a, b;\nOUTPUT out;\nout = a & b;`,
+  "Error: syntax": `// Syntax error: the closing parenthesis is missing\nINPUT a, b;\nOUTPUT out;\nout = (a AND b;`,
+  "Error: cycle": `// Semantic error: out and w depend on each other\nWIRE w;\nOUTPUT out;\nw = out;\nout = w;`,
   "Find the error": `INPUT a;\nOUTPUT out;\nout = a AND missing;`,
 };

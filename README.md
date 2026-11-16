@@ -60,7 +60,7 @@ PYTHONPATH=backend .venv/bin/python -m compiler examples/intro.logic --phase ir
 PYTHONPATH=backend .venv/bin/python -m compiler examples/optimization.logic --no-optimize
 ```
 
-Install Icarus Verilog (`iverilog` and `vvp`) to enable the external Verilog equivalence tests. They are explicitly skipped when unavailable. See [verification](docs/verification.md) for actual results.
+Install Icarus Verilog (`iverilog` and `vvp`, e.g. `brew install icarus-verilog`) to enable the external Verilog equivalence tests; they are explicitly skipped when it is unavailable. See [verification](docs/verification.md) for actual results.
 
 ## Static frontend build
 

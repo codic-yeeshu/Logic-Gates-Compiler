@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Editor } from "./Editor";
 import {
   TokenView,
@@ -37,6 +37,13 @@ export default function App() {
   const abort = useRef<AbortController | null>(null);
   const stale =
     !!result && (compiled !== source || compiledOpt !== optimization);
+  const errorSpans = useMemo(
+    () =>
+      stale || !result
+        ? []
+        : result.diagnostics.flatMap((d) => (d.span ? [d.span] : [])),
+    [result, stale],
+  );
   function edit(value: string) {
     request.current++;
     abort.current?.abort();
@@ -257,6 +264,7 @@ export default function App() {
             onChange={edit}
             onCompile={compile}
             selection={selection}
+            errors={errorSpans}
           />
           <div className="editor-footer">
             <span>

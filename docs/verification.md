@@ -4,8 +4,8 @@ Executed by the AI coding assistant on November 16, 2026. These checks are not r
 
 ## Automated checks
 
-- `.venv/bin/python -m pytest -q`: **62 passed, 2 skipped**.
-- Skips: external Verilog simulator tests with optimization enabled/disabled, because `iverilog` and `vvp` are not installed.
+- `.venv/bin/python -m pytest -q`: **65 passed, 0 skipped** (re-run on November 16, 2026 with Icarus Verilog 13.0 installed).
+- The external Verilog equivalence tests (optimization enabled and disabled) now run and pass: the generated Verilog, simulated by `iverilog`/`vvp`, matches the compiler's own truth table.
 - Generated equivalence cases: 150 deterministic programs × 8 input vectors. Each compares independent AST interpretation against original IR, optimized IR, and netlist evaluation for two outputs.
 - Coverage includes every gate, constants, precedence, associativity, nested and long expressions, lexical positions, semantic diagnostics, cycles, forward dependencies, public-output aliases, resource bounds, full/half adders, multiplexers, and strict API request validation.
 - Maximum supported truth-table size: 4096 rows checked.
@@ -30,7 +30,6 @@ Executed by the AI coding assistant on November 16, 2026. These checks are not r
 
 ## Explicit limitations
 
-- External Verilog simulation remains unverified until Icarus Verilog is installed and the two tests pass.
 - SVG, JSON, and CSV export controls are implemented; their individual downloaded files were not inspected in this browser pass.
 - Keyboard shortcut, resize interaction, pagination beyond 32 rows, and network failure display are implemented but not individually exercised in this browser pass.
 - The report uses IEEEtran. Local command-line LaTeX is unavailable; built-in compilation was attempted and its outcome is recorded separately below.
@@ -53,3 +52,18 @@ Browser verification confirmed all seven gate outputs at input vectors 00, 11, a
 ## Final IEEE report
 
 The earlier PDF compilation limitation is resolved. Tectonic 0.17.0 compiled the revised five-page IEEEtran report successfully. All five rendered pages were inspected; after adding Team ABC, the supplied member names, CS & AI, and Rishihood University, the affected title and contribution pages were checked again. There are no overfull-box warnings. One underfull paragraph spacing warning remains. The report includes methodology, phase contracts, worked source/IR/Verilog examples, a vector circuit diagram, truth table, error cases, results, honest assigned contributions, AI disclosure, and future scope. The PDF and editable source are included in docs/report/.
+
+## Error examples, editor underlines, and frontend end-to-end pass
+
+Added `examples/lexical-error.logic`, `syntax-error.logic`, and `cycle-error.logic` (also in the example menu). `test_examples` now asserts that each failing example is reported by the expected phase. The editor underlines the span of every diagnostic and clears the underline as soon as the text changes. An API request containing an unpaired surrogate now gets HTTP 422 instead of a server error.
+
+Browser pass against the dev servers (all observed, not assumed):
+
+- All 10 examples compile; success examples show seven complete phases, error examples stop at lexical, syntax, or semantic with later phases blocked, the correct diagnostic and line/column, and an underline on the exact offending text.
+- Every phase's Output, Input, Explanation, and JSON tabs render. Full adder circuit toggling gives the correct sum and carry (1+1+0 and 1+1+1).
+- A 12-input program yields 4,096 rows over 128 pages; Previous/Next work and the last row is correct.
+- Optimize toggle marks results OUTDATED and recompiling shows 0 rewrites when disabled.
+- Cmd+Enter compiles. A missing final semicolon (zero-width end-of-source span) underlines the last character. An error after an emoji comment underlines and selects the correct character (code-point to UTF-16 conversion).
+- Editing after a failed compile clears the underline, disables the stale diagnostic, and shows OUTDATED.
+- With the API stopped, the UI shows the "Could not reach the compiler API" message and recovers on the next compile once the API is back.
+- At a 375 px viewport the page has no horizontal overflow.

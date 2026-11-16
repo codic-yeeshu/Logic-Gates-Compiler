@@ -1,0 +1,4 @@
+// Lexical error: & is not a valid token
+INPUT a, b;
+OUTPUT out;
+out = a & b;

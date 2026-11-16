@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
-import { EditorState } from "@codemirror/state";
+import { EditorState, StateEffect, StateField } from "@codemirror/state";
 import {
+  Decoration,
   EditorView,
   lineNumbers,
   highlightActiveLine,
@@ -9,16 +10,37 @@ import {
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import type { Span } from "./types";
 
+// Error underlines: set from compiler diagnostics, cleared as soon as the text changes.
+const setErrors = StateEffect.define<{ from: number; to: number }[]>();
+const errorField = StateField.define({
+  create: () => Decoration.none,
+  update(marks, tr) {
+    if (tr.docChanged) return Decoration.none;
+    for (const effect of tr.effects)
+      if (effect.is(setErrors))
+        return Decoration.set(
+          effect.value.map((r) =>
+            Decoration.mark({ class: "cm-error-span" }).range(r.from, r.to),
+          ),
+          true,
+        );
+    return marks;
+  },
+  provide: (field) => EditorView.decorations.from(field),
+});
+
 export function Editor({
   value,
   onChange,
   onCompile,
   selection,
+  errors,
 }: {
   value: string;
   onChange: (value: string) => void;
   onCompile: () => void;
   selection: Span | null;
+  errors: Span[];
 }) {
   const host = useRef<HTMLDivElement>(null),
     view = useRef<EditorView | null>(null);
@@ -30,6 +52,7 @@ export function Editor({
       state: EditorState.create({
         doc: value,
         extensions: [
+          errorField,
           lineNumbers(),
           highlightActiveLine(),
           history(),
@@ -68,6 +91,11 @@ export function Editor({
             },
             ".cm-activeLine": { background: "#eaf0e7" },
             "&.cm-focused": { outline: "none" },
+            ".cm-error-span": {
+              textDecoration: "underline wavy #c0392b",
+              textUnderlineOffset: "3px",
+              backgroundColor: "rgba(192,57,43,0.10)",
+            },
           }),
         ],
       }),
@@ -85,6 +113,30 @@ export function Editor({
         changes: { from: 0, to: editor.state.doc.length, insert: value },
       });
   }, [value]);
+  useEffect(() => {
+    const editor = view.current;
+    if (!editor) return;
+    const text = editor.state.doc.toString();
+    // Compiler offsets count code points; CodeMirror counts UTF-16 units.
+    const units = (offset: number) =>
+      Array.from(text).slice(0, offset).join("").length;
+    const ranges = (errors ?? []).map((span) => {
+      const from = units(span.start);
+      let to = units(span.end);
+      if (to <= from) to = Math.min(text.length, from + 1);
+      return { from: Math.min(from, to), to };
+    });
+    // A zero-width span at the very end of the text cannot be marked; step back one character.
+    editor.dispatch({
+      effects: setErrors.of(
+        ranges
+          .map((r) =>
+            r.to <= r.from ? { from: Math.max(0, r.from - 1), to: r.from } : r,
+          )
+          .filter((r) => r.to > r.from),
+      ),
+    });
+  }, [errors]);
   useEffect(() => {
     const editor = view.current;
     if (editor && selection) {

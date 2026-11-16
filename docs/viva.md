@@ -31,7 +31,7 @@
 5. Toggle circuit inputs and compare the truth table.
 6. Download Verilog and identify ports, wires, gates, and assignments.
 7. Compile Optimization to show common-expression sharing and dead code.
-8. Compile Find the error and explain why later phases are blocked.
+8. Compile Error: lexical, Error: syntax, and Error: cycle (or Find the error). Each stops at a different phase; point at the underlined span and explain why later phases are blocked.
 
 ## Member preparation
 

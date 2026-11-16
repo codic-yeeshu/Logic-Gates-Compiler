@@ -32,10 +32,17 @@ def test_not_and_constant():
 
 def test_examples():
     root = Path(__file__).resolve().parents[2] / "examples"
+    failing = {
+        "semantic-error": "semantic",
+        "cycle-error": "semantic",
+        "lexical-error": "lexical",
+        "syntax-error": "syntax",
+    }
     for file in root.glob("*.logic"):
-        assert compile_source(file.read_text())["success"] == (
-            file.stem != "semantic-error"
-        )
+        result = compile_source(file.read_text())
+        assert result["success"] == (file.stem not in failing), file.name
+        if file.stem in failing:
+            assert result["diagnostics"][0]["phase"] == failing[file.stem], file.name
     rows = compile_source((root / "full-adder.logic").read_text())["phases"][
         "simulation"
     ]["output"]["rows"]

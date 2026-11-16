@@ -1,0 +1,4 @@
+// Syntax error: the closing parenthesis is missing
+INPUT a, b;
+OUTPUT out;
+out = (a AND b;
