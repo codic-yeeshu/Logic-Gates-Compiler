@@ -85,7 +85,7 @@ HTTP 200 includes `schema_version`, `success`, `phases`, and `diagnostics`, incl
 
 ## Documentation and submission
 
-Start with [the documentation index](docs/README.md), [language specification](docs/language.md), [walkthrough](docs/walkthrough.md), and [viva guide](docs/viva.md). The [contribution record](docs/contributions.md) distinguishes authorized ownership from confirmed individual work. [AI assistance](docs/ai-assistance.md) is disclosed explicitly. The IEEE report source is in `docs/report/`.
+Start with [the documentation index](docs/README.md), [language specification](docs/language.md), [walkthrough](docs/walkthrough.md), and [viva guide](docs/viva.md). The [contribution record](docs/contributions.md) distinguishes authorized ownership from confirmed individual work. [AI assistance](docs/ai-assistance.md) is disclosed explicitly. The IEEE report source is in [docs/report/](docs/report/README.md).
 
 ## Limits
 

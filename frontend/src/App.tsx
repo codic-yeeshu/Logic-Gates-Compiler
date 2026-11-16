@@ -67,7 +67,7 @@ export default function App() {
         setActive("codegen");
         setTab("Output");
       } else {
-        setActive(data.diagnostics[0].phase as PhaseName);
+        setActive((data.diagnostics[0]?.phase as PhaseName) || "lexical");
         setTab("Output");
       }
     } catch (e) {
@@ -364,9 +364,9 @@ export default function App() {
                 aria-current={active === id ? "step" : undefined}
               >
                 <span
-                  className={"phase-dot " + (result?.phases[id].status || "")}
+                  className={"phase-dot " + (result?.phases[id]?.status || "")}
                 >
-                  {result?.phases[id].status === "complete" ? "✓" : index + 1}
+                  {result?.phases[id]?.status === "complete" ? "✓" : index + 1}
                 </span>
                 {
                   [

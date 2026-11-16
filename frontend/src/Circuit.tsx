@@ -101,7 +101,7 @@ export function Circuit({ netlist }: { netlist: Netlist }) {
       g.op,
       ...(g.args.map((a) => values[a]) as [number, number]),
     );
-    levels[g.dest] = 1 + Math.max(...g.args.map((a) => levels[a]));
+    levels[g.dest] = 1 + Math.max(0, ...g.args.map((a) => levels[a]));
   });
   const nodes = [
     ...netlist.inputs.map((name) => ({ name, op: "INPUT" })),
@@ -186,6 +186,7 @@ export function Circuit({ netlist }: { netlist: Netlist }) {
             g.args.map((arg, i) => {
               const a = positions[arg],
                 b = positions[g.dest];
+              if (!a || !b) return null;
               const targetY =
                 b.y + (g.args.length === 1 ? 32 : i === 0 ? 19 : 45);
               return (
