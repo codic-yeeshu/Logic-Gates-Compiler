@@ -239,7 +239,7 @@ The source editor is on the left, and phase results are on the right. Each phase
 
 After a successful compilation, the Circuit tab opens automatically. It draws conventional gate symbols and connected wires from the generated netlist. Green wires carry 1 and gray wires carry 0. Users can toggle input bits, inspect named outputs, switch between fit and actual size, and export an SVG. Verilog and netlist JSON can also be downloaded. The simulation view offers a paginated truth table and CSV export.
 
-If source code changes, previous results are marked outdated until the next compilation. A newer request cannot be overwritten by an older response. Clicking a diagnostic selects its source location. On narrow screens, the editor and results are stacked vertically.
+If source code changes, previous results are marked outdated until the next compilation. A newer request cannot be overwritten by an older response. The offending text is underlined in the editor until the source changes, and clicking a diagnostic selects its source location. On narrow screens, the editor and results are stacked vertically.
 
 \section{Error Handling and Quality Checks}
 \subsection{Errors by Phase}
@@ -275,8 +275,10 @@ The optimizer is also tested with 150 generated programs. Each has three inputs 
 \centering\small
 \begin{tabular}{@{}P{0.57\columnwidth}P{0.36\columnwidth}@{}}
 \toprule Check & Recorded result\\\midrule
-Python automated tests & 62 passed\\
-External Verilog simulator tests & 2 skipped\\
+Python automated tests & 73 passed, 0 skipped\\
+External Verilog simulator tests & Passed\\
+Random programs vs. independent evaluator & 3000 checked\\
+Generated Verilog co-simulation & 240 runs matched\\
 Generated program input vectors & 1200 checked\\
 Maximum truth-table rows & 4096 checked\\
 TypeScript and static frontend build & Passed\\
@@ -285,7 +287,7 @@ Optimization demo: IR count & 9 reduced to 2\\
 Introduction example: IR count & 5 reduced to 4\\\bottomrule
 \end{tabular}
 \end{table}
-The two skipped tests need Icarus Verilog~\cite{icarus}, which was not installed in the test environment. Therefore, this report does not claim that the generated Verilog has passed external simulation. The internal netlist and truth-table tests did pass.
+The external Verilog tests use Icarus Verilog~\cite{icarus} (version 13.0). They simulate the generated Verilog and compare every output with the compiler's own truth table; they pass. A separate review compiled 240 Verilog modules, from 120 random programs with optimization on and off, with a testbench that tries every input combination. All outputs matched an independent evaluator. This is strong evidence for the tested programs, not a proof for every possible program.
 
 Browser checks confirmed compilation, AST display, diagnostic selection, live circuit values, the optimization log, and the full-adder truth table. All gate outputs were also checked in the circuit view for input vectors 00, 11, and 10. A Verilog download succeeded. Fit/actual-size switching worked, and a 390-pixel viewport had no document-level horizontal overflow. No browser recording was required for the circuit update.
 
@@ -321,7 +323,7 @@ npm --prefix frontend run build
 The project repository is listed in the references~\cite{repo}. It is publicly accessible at the time of this report. The report uses the IEEE conference document class and two-column layout~\cite{ieee}.
 
 \section{Limitations and Future Scope}
-Current limits include single-bit signals, combinational logic only, one reported error at a time, and a maximum of 12 inputs for complete truth tables. Optimization uses a selected set of local rules. Large circuit drawings may need scrolling, and the generated Verilog still needs external simulator verification in a suitable environment.
+Current limits include single-bit signals, combinational logic only, one reported error at a time, and a maximum of 12 inputs for complete truth tables. Optimization uses a selected set of local rules. Large circuit drawings may need scrolling, and the generated Verilog has been simulated only for the tested programs and a simple testbench; it has not been synthesized for hardware.
 
 Possible improvements are:
 \begin{enumerate}

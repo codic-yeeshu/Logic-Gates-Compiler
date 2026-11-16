@@ -12,7 +12,7 @@ Assigned owner: **rhythm8877**. Initial implementation is AI-assisted; member re
 
 ## Algorithm
 
-Recursive descent recognizes declarations and assignments. Precedence climbing parses binary operators; a higher minimum precedence on the right makes binary tiers left-associative. NOT recurses at the highest tier. Parentheses restart at the lowest tier. AST height and recursive depth are checked.
+Recursive descent recognizes declarations and assignments. Precedence climbing parses binary operators; a higher minimum precedence on the right makes binary tiers left-associative. NOT recurses at the highest tier. Parentheses restart at the lowest tier. AST height and recursive depth are checked (limit 64). Diagnostics name the expected token readably, for example `Expected ';', found end of source.` or `Expected ')', found ';'.`
 
 ## Worked example
 

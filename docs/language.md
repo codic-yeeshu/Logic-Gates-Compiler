@@ -2,7 +2,7 @@
 
 ## Lexical rules
 
-Identifiers match `[A-Za-z_][A-Za-z_0-9]*`. Keywords are uppercase and reserved. Names are case-sensitive. The only numeric literals are `0` and `1`. Whitespace and `//` comments through end of line are skipped. Tokens retain source offsets, line, and column. `EOF` is an explicit end marker. Invalid characters are lexical errors; `10` is two BIT tokens and is subsequently rejected by the parser where a single expression is required.
+Identifiers match `[A-Za-z_][A-Za-z_0-9]*`. Keywords are uppercase and reserved. Names are case-sensitive. The only numeric literals are `0` and `1`. Whitespace and `//` comments through end of line are skipped. Tokens retain source offsets, line, and column. CRLF, LF, and a lone CR each end one line. The command-line tool accepts a UTF-8 byte-order mark; the lexer itself treats a BOM as an invalid character. `EOF` is an explicit end marker. Invalid characters are lexical errors; `10` is two BIT tokens and is subsequently rejected by the parser where a single expression is required.
 
 ## Grammar (EBNF)
 
@@ -21,7 +21,7 @@ Precedence is NOT, AND/NAND, XOR/XNOR, OR/NOR (highest first). Each binary tier 
 
 ## Semantic rules
 
-Declare at least one output. All declarations precede assignments. Names are unique across all declaration kinds. Inputs cannot be assigned. Every declared wire and output has exactly one assignment. Every referenced signal must be declared. A wire or output may depend on a later assignment: the dependency graph is topologically sorted. Any cycle, including a self-reference, is invalid. Unused inputs and wires are permitted; dead internal computation may be eliminated, but public ports stay present.
+Declare at least one output. All declarations precede assignments. Names are unique across all declaration kinds. Inputs cannot be assigned. Every declared wire and output has exactly one assignment. Every referenced signal must be declared. A wire or output may depend on a later assignment: the dependency graph is topologically sorted. Any cycle, including a self-reference, is invalid, and the diagnostic shows the loop (for example `w -> out -> w`). When several names in one expression are undefined, the leftmost is reported. Unused inputs and wires are permitted; dead internal computation may be eliminated, but public ports stay present.
 
 Example with forward reference:
 

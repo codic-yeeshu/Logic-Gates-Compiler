@@ -39,4 +39,4 @@ Each owner should run their phase's tests, trace a normal case and an error case
 
 ## Limits to acknowledge
 
-No sequential logic, global Boolean minimization, timing analysis, or multi-error parser recovery. AST visualization is provided rather than a full concrete parse tree. The current resource limits keep evaluation and display bounded. Do not claim external Verilog or PDF checks were performed unless verification.md records them.
+No sequential logic, global Boolean minimization, timing analysis, or multi-error parser recovery. AST visualization is provided rather than a full concrete parse tree. The current resource limits keep evaluation and display bounded. Verilog was checked with Icarus Verilog and the report PDF was rebuilt; `verification.md` records exactly what was run. Only the first error is reported, so correct it and recompile.

@@ -30,18 +30,17 @@ Executed by the AI coding assistant on November 16, 2026. These checks are not r
 
 ## Explicit limitations
 
-- SVG, JSON, and CSV export controls are implemented; their individual downloaded files were not inspected in this browser pass.
-- Keyboard shortcut, resize interaction, pagination beyond 32 rows, and network failure display are implemented but not individually exercised in this browser pass.
-- The report uses IEEEtran. Local command-line LaTeX is unavailable; built-in compilation was attempted and its outcome is recorded separately below.
+- The Verilog, netlist JSON, SVG, and CSV downloads, the keyboard shortcut, pagination to the last page, and the network-failure message were exercised in the later browser passes below. The drag-to-resize divider was not re-tested.
+- The report uses IEEEtran. It was rebuilt with `pdflatex` (see the next section).
 - Team name, full report author names, institution, member review, and submission remain pending. The GitHub repository has since been created and pushed.
 
 ## Report compilation outcome
 
-The built-in LaTeX compiler timed out while downloading and initializing its TeX format dependencies. It did not produce a confirmed PDF compilation result. No report PDF or visual PDF QA is claimed. The complete IEEEtran source and two-pass build instructions are provided in `report/`; compile it with a ready TeX installation or import it into Overleaf before submission.
+An earlier attempt with the built-in LaTeX compiler timed out. Later, after the test results in `main.tex` were updated (73 passed, 0 skipped, Icarus Verilog results), `sh docs/report/build.sh` rebuilt `Logic-Lab-IEEE-Report.pdf` with `pdflatex` (two passes): 5 pages, no undefined references, and the results page was inspected visually. The committed PDF matches the current source. Re-run the script after any further edit to `main.tex`.
 
 ## Clean-checkout verification
 
-A fresh local clone was created outside the workspace. Its own virtual environment and frontend dependencies were installed from the committed dependency files. Running its test suite produced **62 passed, 2 skipped**, and its production frontend build passed with Node 24.22.1. The check did not use the workspace's node_modules or virtual environment. The host's default npm path changed after an interruption, so the installed Node 24 bin directory was explicitly placed first in PATH for the final build.
+Earlier in the day (before the later review below, hence the older counts), a fresh local clone was created outside the workspace. Its own virtual environment and frontend dependencies were installed from the committed dependency files. Running its test suite produced **62 passed, 2 skipped**, and its production frontend build passed with Node 24.22.1. The check did not use the workspace's node_modules or virtual environment. The host's default npm path changed after an interruption, so the installed Node 24 bin directory was explicitly placed first in PATH for the final build.
 
 ## Circuit discoverability and schematic update
 

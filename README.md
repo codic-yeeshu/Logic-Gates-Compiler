@@ -25,7 +25,7 @@ Start the frontend in terminal 2:
 npm --prefix frontend run dev
 ```
 
-Open http://127.0.0.1:5173. Choose an example, press **Compile circuit**, and navigate the seven phases. Use Ctrl+Enter / Cmd+Enter to compile. Click a diagnostic to select the source location. Drag the divider, or focus it and use arrow keys, to resize the editor.
+Open http://127.0.0.1:5173. Choose an example, press **Compile circuit**, and navigate the seven phases. The example menu includes working circuits and one program per error class (lexical, syntax, and two semantic errors); the offending text is underlined in the editor. Use Ctrl+Enter / Cmd+Enter to compile. Click a diagnostic to select the source location. Drag the divider, or focus it and use arrow keys, to resize the editor.
 
 ## Example
 
@@ -81,7 +81,7 @@ No remote repository or deployment has been created. Commit the source and lockf
 {"source":"OUTPUT out; out = 1;", "optimization":true}
 ```
 
-HTTP 200 includes `schema_version`, `success`, `phases`, and `diagnostics`, including for language errors. Invalid request shapes return HTTP 422. Each phase contains `status`, `input`, `output`, and `explanation`. Diagnostics contain `phase`, `code`, `message`, `severity`, and optional `span`. Offsets are zero-based, end-exclusive; line and column are one-based. The language uses ASCII identifiers. No authentication or persistence is provided.
+HTTP 200 includes `schema_version`, `success`, `phases`, and `diagnostics`, including for language errors. Invalid request shapes, and text that is not valid Unicode, return HTTP 422. Each phase contains `status`, `input`, `output`, and `explanation`. Diagnostics contain `phase`, `code`, `message`, `severity`, and optional `span`. Offsets are zero-based, end-exclusive; line and column are one-based. The language uses ASCII identifiers. No authentication or persistence is provided.
 
 ## Documentation and submission
 
@@ -89,4 +89,4 @@ Start with [the documentation index](docs/README.md), [language specification](d
 
 ## Limits
 
-Maximum 20 KB UTF-8 source, 12 input signals, 200 total declared signals, 64 levels of expression syntax/tree depth. Truth tables have at most 4096 rows. Large netlists scroll horizontally. The circuit uses conventional gate outlines, signal labels, and live wire values. This version has no clocks, flip-flops, buses, arithmetic syntax, sequential logic, parser error recovery, or hardware timing model. Compilation reports the first language error; correct it and recompile. Optimization is local and does not claim globally minimal gate count.
+Maximum 20 KB UTF-8 source, 12 input signals, 200 total declared signals, 64 levels of expression syntax/tree depth. Truth tables have at most 4096 rows. Large netlists scroll horizontally. The circuit uses conventional gate outlines, signal labels, and live wire values. This version has no clocks, flip-flops, buses, arithmetic syntax, sequential logic, parser error recovery, or hardware timing model. Compilation reports the first language error; correct it and recompile. Errors are positioned (line, column, and an editor underline) where a location exists; cycle errors show the loop, and undefined names are reported leftmost-first. Optimization is local and does not claim globally minimal gate count.

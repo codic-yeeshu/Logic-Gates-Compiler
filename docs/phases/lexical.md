@@ -12,7 +12,7 @@ Assigned owner: **Dibya-z**. Initial implementation is AI-assisted; member revie
 
 ## Algorithm
 
-The scanner repeatedly matches a comment, whitespace, identifier, bit, or punctuation at the current offset. It classifies complete identifiers as keywords only after matching, then advances line and column. A nonmatching character raises INVALID_CHARACTER.
+The scanner repeatedly matches a comment, whitespace, identifier, bit, or punctuation at the current offset. It classifies complete identifiers as keywords only after matching, then advances line and column. A nonmatching character raises INVALID_CHARACTER. Whitespace containing CRLF, LF, or a lone CR advances the line number once per line break; columns count code points and a tab counts as one column.
 
 ## Worked example
 

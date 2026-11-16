@@ -8,7 +8,8 @@
 | Semantic handling | Declaration checks, single assignment, dependency ordering, cycle errors |
 | IR generation | Three-address operations and copy instructions |
 | Optimization | Rewrite log, identities, folding, CSE, dead-code elimination |
-| Target correctness | Netlist simulation, truth tables, generated Verilog, optional Icarus tests |
+| Target correctness | Netlist simulation, truth tables, generated Verilog simulated with Icarus Verilog (tests run, 0 skipped) |
+| Error handling shown | One example per error class, positioned diagnostics, editor underline, tests asserting each failing phase |
 | Interactive phases | Input / Output / Explanation / JSON for seven phases |
 | Visual output | AST, symbols, gate circuit, live switches, truth tables |
 | Report | IEEE conference LaTeX source; placeholders must be replaced |
