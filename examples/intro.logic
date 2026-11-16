@@ -1,0 +1,6 @@
+INPUT a, b, c;
+WIRE intermediate;
+OUTPUT out;
+
+intermediate = a AND b;
+out = intermediate OR NOT c;

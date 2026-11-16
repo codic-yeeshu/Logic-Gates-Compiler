@@ -1,0 +1,8 @@
+// A one-bit full adder
+INPUT a, b, carry_in;
+WIRE partial;
+OUTPUT sum, carry_out;
+
+partial = a XOR b;
+sum = partial XOR carry_in;
+carry_out = (a AND b) OR (partial AND carry_in);

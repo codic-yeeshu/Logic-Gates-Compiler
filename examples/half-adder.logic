@@ -1,0 +1,4 @@
+INPUT a, b;
+OUTPUT sum, carry;
+sum = a XOR b;
+carry = a AND b;
