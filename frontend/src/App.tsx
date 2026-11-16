@@ -110,7 +110,8 @@ export default function App() {
           </h3>
           <p>
             {phase?.status === "error"
-              ? "Use the diagnostic below to correct the source."
+              ? (result?.diagnostics.find((d) => d.phase === active)?.message ??
+                "Use the diagnostic below to correct the source.")
               : "Write a circuit or choose an example, then press Compile."}
           </p>
         </div>

@@ -8,6 +8,7 @@ export function download(name: string, content: string, type = "text/plain") {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+const count = (n: number, noun: string) => `${n} ${noun}${n === 1 ? "" : "s"}`;
 function operate(op: string, a: number, b = 0): number {
   switch (op) {
     case "COPY":
@@ -130,9 +131,12 @@ export function Circuit({ netlist }: { netlist: Netlist }) {
     <>
       <div className="circuit-caption">
         <span>
-          {netlist.inputs.length} inputs ·{" "}
-          {netlist.gates.filter((g) => g.op !== "COPY").length} logic gates ·{" "}
-          {netlist.outputs.length} outputs
+          {count(netlist.inputs.length, "input")} ·{" "}
+          {count(
+            netlist.gates.filter((g) => g.op !== "COPY").length,
+            "logic gate",
+          )}{" "}
+          · {count(netlist.outputs.length, "output")}
         </span>
         <span>Generated from compiled netlist</span>
       </div>

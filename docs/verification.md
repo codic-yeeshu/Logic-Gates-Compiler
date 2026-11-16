@@ -76,3 +76,10 @@ Browser pass against the dev servers (all observed, not assumed):
 - Lexer, parser, and semantic boundaries were probed (nesting limits of 63/64 NOTs and 63/64 chained operators, 20 KB byte limit, 12/13 inputs, 200/201 signals, CRLF and lone CR, BOM in files, non-ASCII input).
 - Fixes found by the review: undefined names are reported leftmost-first and dependencies are listed in source order; cycle messages show the path; limit errors are positioned; a lone carriage return advances the line; parser messages read `Expected ';'` instead of `Expected SEMI`; the CLI reports an unreadable file cleanly and accepts a UTF-8 BOM.
 - Frontend downloads (Verilog, netlist JSON, circuit SVG, truth-table CSV) were captured in the browser and their contents checked against the displayed results.
+
+## Frontend and backend alignment pass
+
+- Every object the API returns (all phases, both optimization modes, all examples) was compared with `frontend/src/types.ts`; no field the interface expects is missing.
+- Seven edge programs (constant-only output, unused input, pass-through outputs, output feeding another output, very long names, constant-folding to a constant, multi-gate three-input) were compiled in the browser with optimization on and off. Every phase and tab rendered, no SVG contained invalid numbers, and for every input combination the circuit's output values matched the truth-table row (0 mismatches). No runtime errors were raised.
+- Empty source, comment-only source, and 13 inputs show their diagnostic without a crash; a 12-input, 31-gate circuit renders in about 1.2 s.
+- The error panel now shows the diagnostic message itself, and the circuit caption uses correct singular and plural wording.
