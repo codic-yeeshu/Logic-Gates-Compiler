@@ -41,6 +41,8 @@ out = intermediate OR NOT c;
 
 Operators: `NOT`, `AND`, `NAND`, `XOR`, `XNOR`, `OR`, `NOR`. Signals are single bits. Declarations precede assignments. Each wire and output must have exactly one assignment. Forward references are allowed; feedback cycles are rejected.
 
+To see how a selector controls a circuit, choose **Multiplexer** in the example menu. Its `select` input chooses `a` when it is `0` and `b` when it is `1`; compile it and inspect the truth table to verify both cases.
+
 ## Architecture
 
 ```text
